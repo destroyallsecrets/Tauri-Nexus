@@ -24,8 +24,12 @@ const ArchitectureVis: React.FC = () => {
     const svg = d3.select(svgRef.current)
       .attr("viewBox", [0, 0, width, height]);
 
-    const simulation = d3.forceSimulation(INITIAL_GRAPH_DATA.nodes as d3.SimulationNodeDatum[])
-      .force("link", d3.forceLink(INITIAL_GRAPH_DATA.links).id((d: any) => d.id).distance(100))
+    // Deep copy data to avoid mutation of the constant source by D3
+    const nodes = JSON.parse(JSON.stringify(INITIAL_GRAPH_DATA.nodes)) as NodeData[];
+    const links = JSON.parse(JSON.stringify(INITIAL_GRAPH_DATA.links)) as LinkData[];
+
+    const simulation = d3.forceSimulation(nodes as d3.SimulationNodeDatum[])
+      .force("link", d3.forceLink(links).id((d: any) => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2));
 
@@ -33,7 +37,7 @@ const ArchitectureVis: React.FC = () => {
       .attr("stroke", "#999")
       .attr("stroke-opacity", 0.6)
       .selectAll("line")
-      .data(INITIAL_GRAPH_DATA.links)
+      .data(links)
       .join("line")
       .attr("stroke-width", (d) => Math.sqrt(d.value));
 
@@ -41,7 +45,7 @@ const ArchitectureVis: React.FC = () => {
       .attr("stroke", "#fff")
       .attr("stroke-width", 1.5)
       .selectAll("circle")
-      .data(INITIAL_GRAPH_DATA.nodes)
+      .data(nodes)
       .join("circle")
       .attr("r", (d) => d.group === 1 ? 12 : d.group === 2 ? 10 : 8)
       .attr("fill", (d) => {
@@ -63,7 +67,7 @@ const ArchitectureVis: React.FC = () => {
 
     const labels = svg.append("g")
       .selectAll("text")
-      .data(INITIAL_GRAPH_DATA.nodes)
+      .data(nodes)
       .join("text")
       .attr("dy", 25)
       .attr("text-anchor", "middle")
@@ -126,7 +130,7 @@ const ArchitectureVis: React.FC = () => {
     <div className="flex h-full bg-tauri-dark relative">
       <div className="flex-1 relative" ref={wrapperRef}>
          <svg ref={svgRef} className="w-full h-full cursor-move"></svg>
-         <div className="absolute top-4 left-4 bg-tauri-card/80 p-2 rounded border border-gray-700 text-xs backdrop-blur-sm">
+         <div className="absolute top-4 left-4 bg-tauri-card/80 p-2 rounded border border-gray-700 text-xs backdrop-blur-sm pointer-events-none">
             <div className="flex items-center gap-2 mb-1"><div className="w-3 h-3 rounded-full bg-[#FF8E31]"></div>Rust (Backend)</div>
             <div className="flex items-center gap-2 mb-1"><div className="w-3 h-3 rounded-full bg-[#24C8DB]"></div>JS (Frontend)</div>
             <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[#888888]"></div>IPC Bridge</div>
