@@ -1,0 +1,5 @@
+{
+  "name": "Tauri Nexus",
+  "description": "An intelligent development assistant and architecture visualizer for the Tauri framework, powered by Gemini 2.0.",
+  "requestFramePermissions": []
+}
